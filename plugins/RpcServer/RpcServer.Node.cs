@@ -48,11 +48,12 @@ partial class RpcServer
     ///   "jsonrpc": "2.0",
     ///   "id": 1,
     ///   "result": {
-    ///     "unconnected": [{"address": "The address", "port": "The port"}],
+    ///     "unconnected": [{"address": "127.0.0.1", "port": 20333}],
     ///     "bad": [],
-    ///     "connected": [{"address": "The address", "port": "The port"}]
+    ///     "connected": [{"address": "127.0.0.1", "port": 10333}]
     ///   }
     /// }</code>
+    /// <para><c>bad</c> is currently always an empty array.</para>
     /// </summary>
     /// <returns>A JObject containing information about unconnected, bad, and connected peers.</returns>
     [RpcMethod]
@@ -121,26 +122,26 @@ partial class RpcServer
     ///   "jsonrpc": "2.0",
     ///   "id": 1,
     ///   "result": {
-    ///     "tcpport": 10333, // The TCP port,
-    ///     "nonce": 1, // The nonce,
-    ///     "useragent": "The user agent",
+    ///     "tcpport": 10333,
+    ///     "nonce": 1,
+    ///     "useragent": "/Neo:3.10.2/",
     ///     "rpc": {
-    ///       "maxiteratorresultitems": 100, // The maximum number of items in the iterator result,
-    ///       "sessionenabled": false // Whether session is enabled,
-    ///      },
-    ///      "protocol": {
-    ///       "addressversion": 0x35, // The address version,
-    ///       "network": 5195086, // The network,
-    ///       "validatorscount": 0, // The number of validators,
-    ///       "msperblock": 15000, // The time per block in milliseconds,
-    ///       "maxtraceableblocks": 2102400, // The maximum traceable blocks,
-    ///       "maxvaliduntilblockincrement": 86400000 / 15000, // The maximum valid until block increment,
-    ///       "maxtransactionsperblock": 512, // The maximum number of transactions per block,
-    ///       "memorypoolmaxtransactions": 50000, // The maximum number of transactions in the memory pool,
-    ///       "initialgasdistribution": 5200000000000000, // The initial gas distribution,
-    ///       "hardforks": [{"name": "The hardfork name", "blockheight": 0/*The block height*/ }],
-    ///       "standbycommittee": ["The public key"],
-    ///       "seedlist": ["The seed list"]
+    ///       "maxiteratorresultitems": 100,
+    ///       "sessionenabled": false
+    ///     },
+    ///     "protocol": {
+    ///       "addressversion": 53,
+    ///       "network": 894710606,
+    ///       "validatorscount": 7,
+    ///       "msperblock": 15000,
+    ///       "maxtraceableblocks": 2102400,
+    ///       "maxvaliduntilblockincrement": 5760,
+    ///       "maxtransactionsperblock": 512,
+    ///       "memorypoolmaxtransactions": 50000,
+    ///       "initialgasdistribution": 5200000000000000,
+    ///       "hardforks": [{"name": "Basilisk", "blockheight": 0}],
+    ///       "standbycommittee": ["02...66 hex digits..."],
+    ///       "seedlist": ["seed1.neo.org:10333"]
     ///     }
     ///   }
     /// }</code>
@@ -201,7 +202,7 @@ partial class RpcServer
     /// {"jsonrpc": "2.0", "id": 1,"method": "sendrawtransaction", "params": ["A Base64-encoded transaction"]}
     /// </code>
     /// <para>Response format:</para>
-    /// <code>{"jsonrpc": "2.0", "id": 1, "result": {"hash": "The hash of the transaction(UInt256)"}}</code>
+    /// <code>{"jsonrpc": "2.0", "id": 1, "result": {"hash": "0x...64 hex digits..."}}</code>
     /// </summary>
     /// <param name="base64Tx">The base64-encoded transaction.</param>
     /// <returns>A JToken containing the result of the transaction relay.</returns>
@@ -245,7 +246,7 @@ partial class RpcServer
     ///   }]
     /// }</code>
     /// <para>Response format:</para>
-    /// <code>{"jsonrpc": "2.0", "id": 1, "result": {"hash": "The hash of the transaction(UInt256)"}}</code>
+    /// <code>{"jsonrpc": "2.0", "id": 1, "result": {"hash": "0x...64 hex digits..."}}</code>
     /// </summary>
     /// <param name="contextJson">
     /// A fully-signed <see cref="ContractParametersContext"/> JSON object whose
@@ -287,7 +288,7 @@ partial class RpcServer
     /// <code>{"jsonrpc": "2.0", "id": 1,"method": "submitblock", "params": ["A Base64-encoded block"]}
     /// </code>
     /// <para>Response format:</para>
-    /// <code>{"jsonrpc": "2.0", "id": 1, "result": {"hash": "The hash of the block(UInt256)"}}</code>
+    /// <code>{"jsonrpc": "2.0", "id": 1, "result": {"hash": "0x...64 hex digits..."}}</code>
     /// </summary>
     /// <param name="base64Block">The base64-encoded block.</param>
     /// <returns>A JToken containing the result of the block submission.</returns>

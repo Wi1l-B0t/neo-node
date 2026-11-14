@@ -31,7 +31,7 @@ partial class RpcServer
     /// <code>{"jsonrpc": "2.0", "id": 1, "method": "getbestblockhash"}</code>
     /// <para>Response format:</para>
     /// <code>
-    /// {"jsonrpc": "2.0", "id": 1, "result": "The block hash(UInt256)"}
+    /// {"jsonrpc": "2.0", "id": 1, "result": "0x...64 hex digits..."}
     /// </code>
     /// </summary>
     /// <returns>The hash of the best block as a <see cref="JToken"/>.</returns>
@@ -46,7 +46,7 @@ partial class RpcServer
     /// <para>Request format:</para>
     /// <code>
     /// // Request with block hash(for example: 0x6c0b6c03fbc7d7d797ddd6483fe59a64f77c47475c1da600b71b189f6f4f234a)
-    /// {"jsonrpc": "2.0", "id": 1, "method": "getblock", "params": ["The block hash(UInt256)"]}
+    /// {"jsonrpc": "2.0", "id": 1, "method": "getblock", "params": ["0x...64 hex digits..."]}
     /// </code>
     /// <code>
     /// // Request with block index
@@ -54,38 +54,42 @@ partial class RpcServer
     /// </code>
     /// <code>
     /// // Request with block hash and verbose is true
-    /// {"jsonrpc": "2.0", "id": 1, "method": "getblock", "params": ["The block hash(UInt256)", true]}
+    /// {"jsonrpc": "2.0", "id": 1, "method": "getblock", "params": ["0x...64 hex digits...", true]}
     /// </code>
     /// <para>Response format:</para>
     /// <code>
-    /// {"jsonrpc": "2.0", "id": 1, "result": "A base64-encoded string of the block"}
+    /// {"jsonrpc": "2.0", "id": 1, "result": "AQID"}
     /// </code>
     /// <para>If verbose is true, the response format is:</para>
     /// <code>{
     ///   "jsonrpc":"2.0",
     ///   "id":1,
     ///   "result":{
-    ///     "hash":"The block hash(UInt256)",
-    ///     "size":697, // The size of the block
-    ///     "version":0, // The version of the block
-    ///     "previousblockhash":"The previous block hash(UInt256)",
-    ///     "merkleroot":"The merkle root(UInt256)",
-    ///     "time":1627896461306, // The timestamp of the block
-    ///     "nonce":"09D4422954577BCE", // The nonce of the block
-    ///     "index":100, // The index of the block
-    ///     "primary":2, // The primary of the block
-    ///     "nextconsensus":"The Base58Check-encoded next consensus address",
-    ///     "witnesses":[{"invocation":"A base64-encoded string","verification":"A base64-encoded string"}],
-    ///     "tx":[], // The transactions of the block
-    ///     "confirmations": 200, // The confirmations of the block, if verbose is true
-    ///     "nextblockhash":"The next block hash(UInt256)" // The next block hash, if verbose is true
+    ///     "hash":"0x...64 hex digits...",
+    ///     "size":697,
+    ///     "version":0,
+    ///     "previousblockhash":"0x...64 hex digits...",
+    ///     "merkleroot":"0x...64 hex digits...",
+    ///     "time":1627896461306,
+    ///     "nonce":"09D4422954577BCE",
+    ///     "index":100,
+    ///     "primary":2,
+    ///     "nextconsensus":"N...",
+    ///     "witnesses":[{"invocation":"AQID","verification":"BAUG"}],
+    ///     "tx":[],
+    ///     "confirmations":200,
+    ///     "nextblockhash":"0x...64 hex digits..."
     ///   }
     /// }</code>
+    /// <para>
+    /// <c>tx</c> is an array of verbose transaction objects. <c>nextblockhash</c>
+    /// is omitted for the current tip.
+    /// </para>
     /// </summary>
     /// <param name="blockHashOrIndex">The block hash or index.</param>
     /// <param name="verbose">Optional, the default value is false.</param>
-    /// <returns>The block data as a <see cref="JToken"/>. If the second item of _params is true, then
-    /// block data is json format, otherwise, the return type is Base64-encoded byte array.</returns>
+    /// <returns>The block data as a <see cref="JToken"/>. If <paramref name="verbose"/>
+    /// is true, this is a JSON object; otherwise it is a Base64 string.</returns>
     [RpcMethod]
     protected internal virtual JToken GetBlock(BlockHashOrIndex blockHashOrIndex, bool verbose = false)
     {
@@ -142,7 +146,7 @@ partial class RpcServer
     /// <code>{"jsonrpc": "2.0", "id": 1, "method": "getblockhash", "params": [100] /* The block index */}</code>
     /// <para>Response format:</para>
     /// <code>
-    /// {"jsonrpc": "2.0", "id": 1, "result": "The block hash(UInt256)"}
+    /// {"jsonrpc": "2.0", "id": 1, "result": "0x...64 hex digits..."}
     /// </code>
     /// </summary>
     /// <param name="height">Block index (block height)</param>
@@ -157,17 +161,15 @@ partial class RpcServer
 
     /// <summary>
     /// Gets a block header by its hash or index.
-    /// <param name="blockHashOrIndex">The block script hash or index (i.e. block height=number of blocks - 1).</param>
-    /// <param name="verbose">Optional, the default value is false.</param>
     /// <remarks>
-    /// When verbose is false, serialized information of the block is returned in a hexadecimal string.
-    /// If you need the detailed information, use the SDK for deserialization.
-    /// When verbose is true or 1, detailed information of the block is returned in Json format.
+    /// When verbose is false, the serialized header is returned as a Base64 string.
+    /// When verbose is true, detailed header information is returned as a JSON object.
+    /// Boolean values can be encoded as JSON booleans or as 0/1.
     /// </remarks>
     /// <para>Request format:</para>
     /// <code>
     /// // Request with block hash(for example: 0x6c0b6c03fbc7d7d797ddd6483fe59a64f77c47475c1da600b71b189f6f4f234a)
-    /// {"jsonrpc": "2.0", "id": 1, "method": "getblockheader", "params": ["The block hash(UInt256)"]}
+    /// {"jsonrpc": "2.0", "id": 1, "method": "getblockheader", "params": ["0x...64 hex digits..."]}
     /// </code>
     /// <code>
     /// // Request with block index
@@ -178,31 +180,33 @@ partial class RpcServer
     /// {"jsonrpc": "2.0", "id": 1, "method": "getblockheader", "params": [100, true]}
     /// </code>
     /// <para>Response format:</para>
-    /// <code>{"jsonrpc": "2.0", "id": 1, "result": "A base64-encoded string of the block header"}</code>
+    /// <code>{"jsonrpc": "2.0", "id": 1, "result": "AQID"}</code>
     /// <para>If verbose is true, the response format is:</para>
     /// <code>{
     ///   "jsonrpc":"2.0",
     ///   "id":1,
     ///   "result": {
-    ///     "hash": "The block hash(UInt256)",
-    ///     "size": 696, // The size of the block header
-    ///     "version": 0, // The version of the block header
-    ///     "previousblockhash": "The previous block hash(UInt256)",
-    ///     "merkleroot": "The merkle root(UInt256)",
-    ///     "time": 1627896461306, // The timestamp of the block header
-    ///     "nonce": "09D4422954577BCE", // The nonce of the block header
-    ///     "index": 100, // The index of the block header
-    ///     "primary": 2, // The primary of the block header
-    ///     "nextconsensus": "The Base58Check-encoded next consensus address",
-    ///     "witnesses": [{"invocation":"A base64-encoded string", "verification":"A base64-encoded string"}],
-    ///     "confirmations": 200, // The confirmations of the block header, if verbose is true
-    ///     "nextblockhash": "The next block hash(UInt256)" // The next block hash, if verbose is true
+    ///     "hash": "0x...64 hex digits...",
+    ///     "size": 696,
+    ///     "version": 0,
+    ///     "previousblockhash": "0x...64 hex digits...",
+    ///     "merkleroot": "0x...64 hex digits...",
+    ///     "time": 1627896461306,
+    ///     "nonce": "09D4422954577BCE",
+    ///     "index": 100,
+    ///     "primary": 2,
+    ///     "nextconsensus": "N...",
+    ///     "witnesses": [{"invocation":"AQID", "verification":"BAUG"}],
+    ///     "confirmations": 200,
+    ///     "nextblockhash": "0x...64 hex digits..."
     ///   }
     /// }</code>
     /// </summary>
+    /// <param name="blockHashOrIndex">The block hash or index; the index is also the block height.</param>
+    /// <param name="verbose">Optional; the default value is false.</param>
     /// <returns>
     /// The block header data as a <see cref="JToken"/>.
-    /// In json format if the second item of _params is true, otherwise Base64-encoded byte array.
+    /// A JSON object if <paramref name="verbose"/> is true; otherwise a Base64 string.
     /// </returns>
     [RpcMethod]
     protected internal virtual JToken GetBlockHeader(BlockHashOrIndex blockHashOrIndex, bool verbose = false)
@@ -237,13 +241,28 @@ partial class RpcServer
     /// Gets the state of a contract by its ID or script hash or (only for native contracts) by case-insensitive name.
     /// <para>Request format:</para>
     /// <code>
-    /// {"jsonrpc": "2.0", "id": 1, "method": "getcontractstate", "params": ["The contract id(int) or hash(UInt160)"]}
+    /// {"jsonrpc": "2.0", "id": 1, "method": "getcontractstate", "params": ["0x...40 hex digits..."]}
     /// </code>
+    /// <para>
+    /// The parameter may also be a numeric contract ID or the case-insensitive
+    /// name of an active native contract.
+    /// </para>
     /// <para>Response format:</para>
-    /// <code>{"jsonrpc": "2.0", "id": 1, "result": "A json string of the contract state"}</code>
+    /// <code>{
+    ///   "jsonrpc": "2.0",
+    ///   "id": 1,
+    ///   "result": {
+    ///     "id": -1,
+    ///     "updatecounter": 0,
+    ///     "hash": "0x...40 hex digits...",
+    ///     "nef": {},
+    ///     "manifest": {}
+    ///   }
+    /// }</code>
     /// </summary>
-    /// <param name="contractNameOrHashOrId">Contract name or script hash or the native contract id.</param>
-    /// <returns>The contract state in json format as a <see cref="JToken"/>.</returns>
+    /// <param name="contractNameOrHashOrId">A contract ID, script hash, or
+    /// case-insensitive native contract name.</param>
+    /// <returns>The contract state as a JSON object.</returns>
     [RpcMethod]
     protected internal virtual JToken GetContractState(ContractNameOrHashOrId contractNameOrHashOrId)
     {
@@ -315,41 +334,46 @@ partial class RpcServer
     /// Gets a transaction by its hash.
     /// <para>Request format:</para>
     /// <code>
-    /// {"jsonrpc": "2.0", "id": 1, "method": "getrawtransaction", "params": ["The tx hash", true/*verbose, optional*/]}
+    /// {"jsonrpc": "2.0", "id": 1, "method": "getrawtransaction", "params": ["0x...64 hex digits...", true]}
     /// </code>
     /// <para>Response format:</para>
     /// If verbose is false, the response format is:
     /// <code>{
     ///   "jsonrpc": "2.0",
     ///   "id": 1,
-    ///   "result": "The Base64-encoded tx data"
+    ///   "result": "AQID"
     /// }</code>
     /// If verbose is true, the response format is:
     /// <code>{
     ///   "jsonrpc": "2.0",
     ///   "id": 1,
     ///   "result": {
-    ///     "hash": "The tx hash(UInt256)",
-    ///     "size": 272, // The size of the tx
-    ///     "version": 0, // The version of the tx
-    ///     "nonce": 1553700339, // The nonce of the tx
-    ///     "sender": "The Base58Check-encoded sender address", // The sender address of the tx
-    ///     "sysfee": "100000000", // The system fee of the tx
-    ///     "netfee": "1272390", // The network fee of the tx
-    ///     "validuntilblock": 2105487, // The valid until block of the tx
-    ///     "attributes": [], // The attributes of the tx
-    ///     "signers": [], // The signers of the tx
-    ///     "script": "A Base64-encoded string", // The script of the tx
-    ///     "witnesses": [{"invocation": "A base64-encoded string", "verification": "A base64-encoded string"}] // The witnesses of the tx
-    ///     "confirmations": 100, // The confirmations of the tx
-    ///     "blockhash": "The block hash", // The block hash
-    ///     "blocktime": 1627896461306 // The block time
+    ///     "hash": "0x...64 hex digits...",
+    ///     "size": 272,
+    ///     "version": 0,
+    ///     "nonce": 1553700339,
+    ///     "sender": "N...",
+    ///     "sysfee": "100000000",
+    ///     "netfee": "1272390",
+    ///     "validuntilblock": 2105487,
+    ///     "attributes": [],
+    ///     "signers": [],
+    ///     "script": "AQID",
+    ///     "witnesses": [{"invocation": "AQID", "verification": "BAUG"}],
+    ///     "blockhash": "0x...64 hex digits...",
+    ///     "confirmations": 100,
+    ///     "blocktime": 1627896461306
     ///   }
     /// }</code>
+    /// <para>
+    /// <c>blockhash</c>, <c>confirmations</c>, and <c>blocktime</c> are present
+    /// only when the transaction is confirmed.
+    /// </para>
     /// </summary>
     /// <param name="hash">The transaction hash.</param>
     /// <param name="verbose">Optional, the default value is false.</param>
-    /// <returns>The transaction data as a <see cref="JToken"/>. In json format if verbose is true, otherwise base64string. </returns>
+    /// <returns>The transaction data as a <see cref="JToken"/>. A JSON object
+    /// if <paramref name="verbose"/> is true; otherwise a Base64 string.</returns>
     [RpcMethod]
     protected internal virtual JToken GetRawTransaction(UInt256 hash, bool verbose = false)
     {
@@ -401,7 +425,8 @@ partial class RpcServer
     /// <para>Response format:</para>
     /// <code>{"jsonrpc": "2.0", "id": 1, "result": "The Base64-encoded storage value"}</code>
     /// </summary>
-    /// <param name="contractNameOrHashOrId">The contract ID or script hash.</param>
+    /// <param name="contractNameOrHashOrId">The contract ID, script hash, or
+    /// case-insensitive native contract name.</param>
     /// <param name="base64Key">The Base64-encoded storage key.</param>
     /// <returns>The storage item as a <see cref="JToken"/>.</returns>
     [RpcMethod]
@@ -443,16 +468,20 @@ partial class RpcServer
     ///   "id": 1,
     ///   "result": {
     ///     "truncated": true,
-    ///     "next": "The Base64-encoded last key (pass as start for the next page)",
+    ///     "next": "AQID",
     ///     "results": [
-    ///       {"key": "The Base64-encoded storage key", "value": "The Base64-encoded storage value"},
-    ///       {"key": "The Base64-encoded storage key", "value": "The Base64-encoded storage value"},
-    ///       // ...
+    ///       {"key": "AQID", "value": "BAUG"}
     ///     ]
     ///   }
     /// }</code>
+    /// <para>
+    /// <c>next</c> is the last key returned on the page. If the page contains no
+    /// new items, it is the supplied start value (or the empty string when no
+    /// start was supplied).
+    /// </para>
     /// </summary>
-    /// <param name="contractNameOrHashOrId">The contract ID (int) or script hash (UInt160).</param>
+    /// <param name="contractNameOrHashOrId">The contract ID, script hash, or
+    /// case-insensitive native contract name.</param>
     /// <param name="base64KeyPrefix">The Base64-encoded storage key prefix.</param>
     /// <param name="start">
     /// Exclusive start key (same encoding as result keys). Omit or pass empty to start at the prefix.

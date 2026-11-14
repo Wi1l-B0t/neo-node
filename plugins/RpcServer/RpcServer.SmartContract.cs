@@ -219,13 +219,14 @@ partial class RpcServer
     ///     "script": "A Base64-encoded string",
     ///     "state": "A string of VMState",
     ///     "gasconsumed": "An integer number in string",
-    ///     "exception": "The exception message",
+    ///     "exception": null,
     ///     "stack": [{"type": "The stack item type", "value": "The stack item value"}],
     ///     "notifications": [
     ///       {"eventname": "The event name", "contract": "The contract hash", "state": {"interface": "A string", "id": "The GUID string"}}
-    ///     ], // The notifications, optional
+    ///     ],
     ///     "diagnostics": {
-    ///       "invokedcontracts": {"hash": "The contract hash","call": [{"hash": "The contract hash"}]}, // The invoked contracts
+    ///       "invokedcontracts": {"hash": "The contract hash", "call": [{"hash": "The contract hash"}]},
+    ///       "traces": {"type": "root", "calls": []},
     ///       "storagechanges": [
     ///         {
     ///           "state": "The TrackState string",
@@ -235,9 +236,17 @@ partial class RpcServer
     ///         // ...
     ///       ] // The storage changes
     ///     }, // The diagnostics, optional, if useDiagnostic is true
-    ///     "session": "A GUID string" // The session id, optional
+    ///     "session": "A GUID string"
     ///   }
     /// }</code>
+    /// <para>
+    /// <c>notifications</c> and <c>stack</c> are always arrays. <c>exception</c>
+    /// is always present and is usually <c>null</c>. <c>session</c> is added only
+    /// when the result owns an iterator and sessions are enabled. If a wallet is
+    /// open, signers are supplied, and execution does not end in <c>FAULT</c>,
+    /// the result may also contain either a Base64 <c>tx</c> or a JSON
+    /// <c>pendingsignature</c> object.
+    /// </para>
     /// </summary>
     /// <param name="scriptHash">The script hash of the contract to invoke.</param>
     /// <param name="operation">The operation to invoke.</param>
@@ -292,7 +301,7 @@ partial class RpcServer
     ///     "script": "A Base64-encoded script",
     ///     "state": "A string of VMState", // see VMState
     ///     "gasconsumed": "An integer number in string", // The gas consumed
-    ///     "exception": "The exception message", // The exception message
+    ///     "exception": null,
     ///     "stack": [
     ///       {"type": "The stack item type", "value": "The stack item value"} // A stack item in the stack
     ///       // ...
@@ -302,9 +311,10 @@ partial class RpcServer
     ///        "contract": "The contract hash", // The hash of the contract
     ///        "state": {"interface": "A string", "id": "The GUID string"} // The state of the event
     ///       }
-    ///     ], // The notifications, optional
+    ///     ],
     ///     "diagnostics": {
-    ///       "invokedcontracts": {"hash": "The contract hash","call": [{"hash": "The contract hash"}]}, // The invoked contracts
+    ///       "invokedcontracts": {"hash": "The contract hash", "call": [{"hash": "The contract hash"}]},
+    ///       "traces": {"type": "root", "calls": []},
     ///       "storagechanges": [
     ///         {
     ///           "state": "The TrackState string",
@@ -314,9 +324,17 @@ partial class RpcServer
     ///         // ...
     ///       ] // The storage changes
     ///     }, // The diagnostics, optional, if useDiagnostic is true
-    ///     "session": "A GUID string" // The session id, optional
+    ///     "session": "A GUID string"
     ///   }
     /// }</code>
+    /// <para>
+    /// <c>notifications</c> and <c>stack</c> are always arrays. <c>exception</c>
+    /// is always present and is usually <c>null</c>. <c>session</c> is added only
+    /// when the result owns an iterator and sessions are enabled. If a wallet is
+    /// open, signers are supplied, and execution does not end in <c>FAULT</c>,
+    /// the result may also contain either a Base64 <c>tx</c> or a JSON
+    /// <c>pendingsignature</c> object.
+    /// </para>
     /// </summary>
     /// <param name="script">The script to invoke.</param>
     /// <param name="signersAndWitnesses">The signers and witnesses of the transaction.</param>
@@ -355,7 +373,8 @@ partial class RpcServer
     /// <param name="sessionId">The session id.</param>
     /// <param name="iteratorId">The iterator id.</param>
     /// <param name="count">The number of items to traverse.</param>
-    /// <returns></returns>
+    /// <returns>A JSON array containing up to <paramref name="count"/> remaining
+    /// iterator items. A negative count returns an empty array.</returns>
     [RpcMethod]
     protected internal virtual JToken TraverseIterator(Guid sessionId, Guid iteratorId, int count)
     {
@@ -391,12 +410,13 @@ partial class RpcServer
     /// <code>{
     ///   "jsonrpc": "2.0",
     ///   "id": 1,
-    ///   "result": true // true if the session is terminated successfully, otherwise false
+    ///   "result": true
     /// }</code>
     /// </summary>
     /// <param name="sessionId">The session id.</param>
-    /// <returns>True if the session is terminated successfully, otherwise false.</returns>
-    /// <exception cref="RpcException">Thrown when the session id is invalid.</exception>
+    /// <returns>True if an existing session was removed; false if the session was
+    /// not found or had already expired.</returns>
+    /// <exception cref="RpcException">Thrown when sessions are disabled.</exception>
     [RpcMethod]
     protected internal virtual JToken TerminateSession(Guid sessionId)
     {

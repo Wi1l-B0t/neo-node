@@ -25,9 +25,13 @@ partial class RpcServer
     ///   "jsonrpc": "2.0",
     ///   "id": 1,
     ///   "result": [
-    ///     {"name": "The plugin name", "version": "The plugin version", "interfaces": ["The plugin method name"]}
+    ///     {"name": "RpcServer", "version": "3.10.2", "interfaces": ["IPlugin"]}
     ///   ]
     /// }</code>
+    /// <para>
+    /// Each <c>interfaces</c> item is the name of a plugin interface implemented
+    /// by the plugin; it is not an RPC method name.
+    /// </para>
     /// </summary>
     /// <returns>A JSON array containing the plugin information.</returns>
     [RpcMethod]
@@ -54,7 +58,7 @@ partial class RpcServer
     /// <code>{
     ///   "jsonrpc": "2.0",
     ///   "id": 1,
-    ///   "result": {"address": "The Base58Check address", "isvalid": true}
+    ///   "result": {"address": "N...", "isvalid": true}
     /// }</code>
     /// </summary>
     /// <param name="address">The address as a string.</param>
